@@ -19,18 +19,44 @@ const Input = ({ isEditing, itemToEdit }: InputProps) => {
     }
   }, [isEditing, itemToEdit.title]);
 
-  const createTodo = (e: React.FormEvent) => {
+  //components/input
+
+  const createTodo = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!todoTitle) {
-      alert("Please enter a value");
+      alert("Title required");
       return;
     }
+
     setIsLoading(true);
-    // Todo: post to the db
-    console.log("todo created", todoTitle);
-    toast.success("Todo created");
-    setTodoTitle("");
-    setIsLoading(false);
+    try {
+      const apiUrl = "/api/todo/create";
+
+      const requestData = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ todoTitle }),
+      };
+
+      const response = await fetch(apiUrl, requestData);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to post title: ${response.status} - ${response.statusText}`
+        );
+      }
+
+      setTodoTitle("");
+      toast.success("Todo created");
+    } catch (error) {
+      console.log(error);
+      toast.error("something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
